@@ -1,13 +1,18 @@
-FROM node:10.1.0-alpine
+FROM node:22-alpine
 
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-COPY package.json /app/
-COPY yarn.lock /app/
+# Install only production dependencies
+COPY package.json package*.json ./
+RUN npm ci --only=production
 
-RUN yarn install --production && yarn cache clean
+# Copy app source
+COPY . .
 
-COPY . /app
+# Expose the default port (3000)
+EXPOSE 3000
 
-ENV NODE_ENV production
-ENTRYPOINT ["node", "-r", "esm", "./bin/server"]
+# Run the server; default port can be overridden via --port
+ENTRYPOINT ["bin/server"]
+CMD ["--port", "3000"]
